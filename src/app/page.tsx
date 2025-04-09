@@ -3,6 +3,7 @@ import { getGithubRepositories } from '@/api/github-repositories';
 import MaxWidthWrapper from '@/components/max-width-wrapper';
 import RepositoryItem from '@/components/repository-item';
 import { Input } from '@/components/ui/input';
+import useDebounce from '@/hooks/use-debounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -10,10 +11,11 @@ const pageSize = 100;
 
 export default function Home() {
 	const [search, setSearch] = useState('');
+	const debouncedSearch = useDebounce(search, 500);
 
 	const { data, isError, isPending } = useInfiniteQuery({
-		queryKey: ['repositories'],
-		queryFn: () => getGithubRepositories(pageSize, search),
+		queryKey: ['repositories', debouncedSearch],
+		queryFn: () => getGithubRepositories(pageSize, debouncedSearch),
 		initialPageParam: 1,
 		getNextPageParam: (lastPage, pages) => {
 			if (lastPage.total_count > pages.length * pageSize) {
@@ -23,7 +25,7 @@ export default function Home() {
 		},
 	});
 	const { items } = data?.pages[0] || { items: [] };
-	// console.log('items', items);
+
 	return (
 		<MaxWidthWrapper className='py-10'>
 			<div className='mb-4'>
