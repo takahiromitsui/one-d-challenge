@@ -1,7 +1,9 @@
 'use client';
 import {
+	DEFAULT_PAGE_SIZE,
 	getGithubRepositories,
 	GithubRepositoryItem,
+	MAX_RESULT,
 } from '@/api/github-repositories';
 import MaxWidthWrapper from '@/components/max-width-wrapper';
 import RepositoryItem from '@/components/repository-item';
@@ -14,17 +16,17 @@ export default function Home() {
 	const [search, setSearch] = useState('');
 	const debouncedSearch = useDebounce(search, 500);
 
-	const { data, isError, isPending, fetchNextPage } = useInfiniteQuery({
-		queryKey: ['repositories', debouncedSearch],
-		queryFn: ({ pageParam = 0 }) =>
-			getGithubRepositories(pageParam, debouncedSearch),
-		initialPageParam: 0,
-		getNextPageParam: (lastPage, pages) => {
-			// console.log('lastPage', lastPage);
-			// console.log('pages', pages);
-			return pages.length + 1;
-		},
-	});
+	const { data, error, isError, isPending, fetchNextPage } =
+		useInfiniteQuery({
+			queryKey: ['repositories', debouncedSearch],
+			queryFn: ({ pageParam = 0 }) =>
+				getGithubRepositories(pageParam, debouncedSearch),
+			initialPageParam: 0,
+			getNextPageParam: (lastPage, pages) => {
+				return pages.length + 1;
+			},
+			enabled: debouncedSearch.trim() !== '',
+		});
 	const repositories = data?.pages.flatMap(page => page.items ?? []) ?? [];
 	return (
 		<MaxWidthWrapper className='py-10'>
@@ -37,7 +39,12 @@ export default function Home() {
 					className='border p-2'
 				/>
 			</div>
-			{isError && <div className='text-red-500'>エラーが発生しました</div>}
+			{isError && (
+				<div className='text-red-500'>
+					エラーが発生しました:{' '}
+					{error instanceof Error ? error.message : '不明なエラー'}
+				</div>
+			)}
 			{isPending && <div className='text-gray-500'>Loading...</div>}
 			{!isPending && repositories?.length === 0 ? (
 				<div className='text-gray-500'>レポジトリが見つかりません</div>
