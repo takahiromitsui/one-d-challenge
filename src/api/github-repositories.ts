@@ -116,11 +116,11 @@ export type GithubRepository = {
 };
 
 export async function getGithubRepositories(
-	page = 100,
+  page=0,
 	search = ''
 ): Promise<GithubRepository> {
 	const response = await fetch(
-		`${BASE_URL}/repositories?q=${search}+in:name&per_page=${page}`,
+		`${BASE_URL}/repositories?q=${search}+in:name&page=${page}`,
 		{
 			method: 'GET',
 			headers: {

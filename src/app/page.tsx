@@ -1,5 +1,8 @@
 'use client';
-import { getGithubRepositories } from '@/api/github-repositories';
+import {
+	getGithubRepositories,
+	GithubRepositoryItem,
+} from '@/api/github-repositories';
 import MaxWidthWrapper from '@/components/max-width-wrapper';
 import RepositoryItem from '@/components/repository-item';
 import { Input } from '@/components/ui/input';
@@ -7,25 +10,22 @@ import useDebounce from '@/hooks/use-debounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
-const pageSize = 100;
-
 export default function Home() {
 	const [search, setSearch] = useState('');
 	const debouncedSearch = useDebounce(search, 500);
 
-	const { data, isError, isPending } = useInfiniteQuery({
+	const { data, isError, isPending, fetchNextPage } = useInfiniteQuery({
 		queryKey: ['repositories', debouncedSearch],
-		queryFn: () => getGithubRepositories(pageSize, debouncedSearch),
-		initialPageParam: 1,
+		queryFn: ({ pageParam = 0 }) =>
+			getGithubRepositories(pageParam, debouncedSearch),
+		initialPageParam: 0,
 		getNextPageParam: (lastPage, pages) => {
-			if (lastPage.total_count > pages.length * pageSize) {
-				return pages.length;
-			}
-			return undefined;
+			// console.log('lastPage', lastPage);
+			// console.log('pages', pages);
+			return pages.length + 1;
 		},
 	});
-	const { items } = data?.pages[0] || { items: [] };
-
+	const repositories = data?.pages.flatMap(page => page.items ?? []) ?? [];
 	return (
 		<MaxWidthWrapper className='py-10'>
 			<div className='mb-4'>
@@ -39,13 +39,23 @@ export default function Home() {
 			</div>
 			{isError && <div className='text-red-500'>エラーが発生しました</div>}
 			{isPending && <div className='text-gray-500'>Loading...</div>}
-			{!isPending && items?.length === 0 ? (
+			{!isPending && repositories?.length === 0 ? (
 				<div className='text-gray-500'>レポジトリが見つかりません</div>
 			) : (
 				<>
-					{items?.map(item => (
-						<RepositoryItem key={item.id} item={item} />
+					{repositories?.map((repo: GithubRepositoryItem) => (
+						<RepositoryItem key={repo.id} item={repo} />
 					))}
+					<button
+						className='bg-blue-500 text-white p-2 rounded'
+						onClick={() => {
+							if (data?.pages.length) {
+								fetchNextPage();
+							}
+						}}
+					>
+						もっと見る
+					</button>
 				</>
 			)}
 		</MaxWidthWrapper>
