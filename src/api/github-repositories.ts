@@ -115,18 +115,21 @@ export type GithubRepository = {
 	items: GithubRepositoryItem[];
 };
 
-export async function getGithubRepositories(
-  page=0,
-	search = ''
-): Promise<GithubRepository> {
+export const DEFAULT_PAGE_SIZE = 30;
+
+export async function getGithubRepositories(page: number, search: string) {
 	const response = await fetch(
-		`${BASE_URL}/repositories?q=${search}+in:name&page=${page}`,
-		{
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		}
+		`${BASE_URL}/repositories?q=${encodeURIComponent(
+			search
+		)}+in:name&per_page=${DEFAULT_PAGE_SIZE}&page=${page}`
 	);
-	return response.json();
+
+	const data = await response.json();
+
+	// GitHub returns 200 with an error message in the body
+	if (!response.ok || data.message) {
+		throw new Error(data.message || '不明なエラー');
+	}
+
+	return data;
 }
