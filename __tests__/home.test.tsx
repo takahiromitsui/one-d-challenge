@@ -54,9 +54,8 @@ const createTestQueryClient = () =>
 		},
 	});
 
-let queryClient: QueryClient;
-
 describe('Home Page', () => {
+	let queryClient: QueryClient;
 	// arrange
 	beforeEach(() => {
 		jest.clearAllMocks();
