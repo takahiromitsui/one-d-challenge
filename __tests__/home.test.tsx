@@ -1,7 +1,11 @@
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Home from '@/app/page';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import {
+	useInfiniteQuery,
+	QueryClient,
+	QueryClientProvider,
+} from '@tanstack/react-query';
 
 // arrange
 // IntersectionObserverをモックする
@@ -40,13 +44,34 @@ jest.mock('@tanstack/react-query', () => ({
 	})),
 }));
 
-describe('Home Page', () => {
-	beforeEach(() => {
-		jest.clearAllMocks();
+// テスト用のQueryClientを用意する
+const createTestQueryClient = () =>
+	new QueryClient({
+		defaultOptions: {
+			queries: {
+				retry: false,
+			},
+		},
 	});
 
+let queryClient: QueryClient;
+
+describe('Home Page', () => {
+	// arrange
+	beforeEach(() => {
+		jest.clearAllMocks();
+		queryClient = createTestQueryClient();
+	});
+
+	const renderHome = () =>
+		render(
+			<QueryClientProvider client={queryClient}>
+				<Home />
+			</QueryClientProvider>
+		);
+
 	it('input fieldをレンダーすべき', () => {
-		render(<Home />);
+		renderHome();
 		// assert
 		expect(
 			screen.getByPlaceholderText('レポジトリを入力して下さい')
@@ -63,7 +88,7 @@ describe('Home Page', () => {
 			hasNextPage: false,
 			isFetchingNextPage: false,
 		});
-		render(<Home />);
+		renderHome();
 		// assert
 		expect(screen.queryByText('読み込み中...')).not.toBeInTheDocument();
 	});
@@ -95,8 +120,7 @@ describe('Home Page', () => {
 			hasNextPage: true,
 			isFetchingNextPage: false,
 		});
-
-		render(<Home />);
+		renderHome();
 
 		// act
 		// ユーザーインプットをシミュレート
@@ -122,8 +146,7 @@ describe('Home Page', () => {
 			hasNextPage: false,
 			isFetchingNextPage: false,
 		});
-
-		render(<Home />);
+		renderHome();
 
 		// assert
 		// エラーが表示されるのを待つ

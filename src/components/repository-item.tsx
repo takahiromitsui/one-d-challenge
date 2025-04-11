@@ -17,7 +17,7 @@ export default function RepositoryItem({
 				className='flex items-center gap-4'
 			>
 				<Avatar>
-					<AvatarImage src={item.owner.avatar_url} />
+					<AvatarImage src={item.owner.avatar_url} alt={item.owner.login} />
 					<AvatarFallback>
 						{item.owner.login.slice(0, 2).toUpperCase()}
 					</AvatarFallback>
