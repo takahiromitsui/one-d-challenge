@@ -35,9 +35,12 @@ export default function Home() {
 		enabled: debouncedSearch.trim() !== '',
 	});
 
-	const { ref, inView } = useInView();
+	const dataPages = data && data.pages ? data.pages : [];
+	const repositories = dataPages.flatMap(page =>
+		page.items ? page.items : []
+	);
 
-	const repositories = data?.pages.flatMap(page => page.items ?? []) ?? [];
+	const { ref, inView } = useInView();
 
 	useEffect(() => {
 		if (inView && hasNextPage) {
