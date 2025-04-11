@@ -7,7 +7,7 @@ import MaxWidthWrapper from '@/components/max-width-wrapper';
 import RepositoryItem from '@/components/repository-item';
 import { Input } from '@/components/ui/input';
 import useDebounce from '@/hooks/use-debounce';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
 import { useEffect, useState } from 'react';
 
@@ -41,12 +41,25 @@ export default function Home() {
 	);
 
 	const { ref, inView } = useInView();
-
+	// 次のページを取得する
 	useEffect(() => {
 		if (inView && hasNextPage) {
 			fetchNextPage();
 		}
 	}, [inView, hasNextPage, fetchNextPage]);
+
+	const queryClient = useQueryClient();
+	//	キャッシュに保存する -> repositoriesページで使用
+	useEffect(() => {
+		if (repositories) {
+			repositories.forEach(repo => {
+				queryClient.setQueryData(
+					['repositories', repo.owner.login, repo.name],
+					repo
+				);
+			});
+		}
+	}, [queryClient, repositories]);
 
 	return (
 		<MaxWidthWrapper className='py-10'>
