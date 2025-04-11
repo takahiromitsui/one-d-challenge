@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## ワンディー株式会社 コーディングチャレンジ（GitHubリポジトリ検索アプリ）
 
-First, run the development server:
+Next.js 15 を使用して、GitHub のリポジトリを検索し、その情報を一覧表示するアプリケーションを作成しました。
+## 前提条件
+このアプリケーションは Docker に対応しているため、Docker 経由で実行する場合は以下が必要です：
 
+- Docker
+- Docker Compose
+
+また、ローカル環境で直接実行する場合は、以下の環境を整えてください：
+- Node.js 18 以上
+- パッケージマネージャー（pnpm、npm など）
+- next のバージョンは 15.2.5 を使用しているため、Next.js 15 以上が必要です。
+## ローカルでの実行方法/テストの実行方法
+
+### ✅ Docker を使う場合
+アプリの起動：
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker compose up app
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ブラウザでアクセス：
+```bash
+http://localhost:3000
+```
+終了：
+```bash
+docker compose down
+```
+テストの実行：
+```bash
+docker compose up test
+```
+### ✅ Docker を使わない場合
+アプリの起動：
+```bash
+pnpm dev
+# または
+npm run dev
+```
+ブラウザでアクセス：
+```bash
+http://localhost:3000
+```
+テストの実行：
+```bash
+pnpm test
+# または
+npm run test
+```
+## 工夫した点・こだわったポイント
+### モダンなUIを意識した検索体験
+ユーザーの操作性を高めるため、「検索」ボタンを排除し、debounce を使って入力後に自動で検索される仕組みを導入しました。
+### 無限スクロールの実装
+`TanStack Query` を用いて無限スクロールを実装。初期段階では「もっと見る」ボタンを使用していましたが、ユーザビリティを考慮し、`react-intersection-observer` を導入してスクロールに応じて自動で次のページをロードするようにしました。
+### データの再利用・パフォーマンスの最適化
+検索結果のレポジトリデータをキャッシュし、詳細ページでも再フェッチせずにそのまま表示することで、API呼び出しを最小限に抑えました。
+### Rate Limit 対策としてのUX配慮
+今回は個人の GitHub トークンを使用せず、Rate Limit による制限が発生するケースを想定しました。その際、GitHub API のエラーメッセージを日本語に変換して表示することで、ユーザーが状況を理解しやすくなるよう配慮しました。
+### スタイリングの統一
+マージンやパディングのバラつきを防ぐために共通の `MaxWidthWrapper` コンポーネントを作成し、レスポンシブ対応も考慮した UI を構築しました。
+### コミットメッセージの明確化
+`Conventional Commits` に従い、`chore`, `feat`, `test`, `refactor`, `docs` などを適切に使い分け、自身の実装意図や変更内容を明確に伝えるよう心がけました。
+ 
+## Screenshots
+### 検索ページ
+![検索ページ](images/home.png)
+### 詳細ページ
+![詳細ページ](images/details.png)
+### エラー画面
+![エラー画面](images/error.png)
