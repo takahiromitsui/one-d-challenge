@@ -1,14 +1,17 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GithubRepositoryItem } from '@/api/github-repositories';
 import Link from 'next/link';
+import React from 'react';
 
 export default function RepositoryItem({
 	item,
+	innerRef,
 }: {
 	item: GithubRepositoryItem;
+	innerRef?: (node?: Element | null) => void;
 }) {
 	return (
-		<div className='border p-4 mb-4 rounded'>
+		<div ref={innerRef} className='border p-4 mb-4 rounded'>
 			<Link
 				href={`/repositories/${item.owner.login}/${item.name}`}
 				className='flex items-center gap-4'

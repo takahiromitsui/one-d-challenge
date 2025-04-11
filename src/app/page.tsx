@@ -8,24 +8,42 @@ import RepositoryItem from '@/components/repository-item';
 import { Input } from '@/components/ui/input';
 import useDebounce from '@/hooks/use-debounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useInView } from 'react-intersection-observer';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
 	const [search, setSearch] = useState('');
 	const debouncedSearch = useDebounce(search, 500);
 
-	const { data, error, isError, isPending, fetchNextPage, hasNextPage } = useInfiniteQuery({
+	const {
+		data,
+		error,
+		isError,
+		isPending,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+	} = useInfiniteQuery({
 		queryKey: ['repositories', debouncedSearch],
-		queryFn: ({ pageParam = 0 }) =>
+		queryFn: ({ pageParam = 1 }) =>
 			getGithubRepositories(pageParam, debouncedSearch),
-		initialPageParam: 0,
+		initialPageParam: 1,
 		getNextPageParam: (lastPage, pages) => {
-			return pages.length + 1;
+			const nextPage = lastPage.items.length ? pages.length + 1 : undefined;
+			return nextPage;
 		},
 		enabled: debouncedSearch.trim() !== '',
 	});
-	
+
+	const { ref, inView } = useInView();
+
 	const repositories = data?.pages.flatMap(page => page.items ?? []) ?? [];
+
+	useEffect(() => {
+		if (inView && hasNextPage) {
+			fetchNextPage();
+		}
+	}, [inView, hasNextPage, fetchNextPage]);
 
 	return (
 		<MaxWidthWrapper className='py-10'>
@@ -43,21 +61,16 @@ export default function Home() {
 			) : null}
 			{
 				<div className='mb-4'>
-					{repositories?.map((repo: GithubRepositoryItem) => (
-						<RepositoryItem key={repo.id} item={repo} />
-					))}
-					{hasNextPage ? (
-						<button
-							className='bg-blue-500 text-white p-2 rounded'
-							onClick={() => {
-								if (data?.pages.length) {
-									fetchNextPage();
-								}
-							}}
-						>
-							もっと見る
-						</button>
-					) : null}
+					{repositories?.map((repo: GithubRepositoryItem, index: number) => {
+						if (repositories.length === index + 1) {
+							return (
+								<RepositoryItem key={repo.id} item={repo} innerRef={ref} />
+							);
+						} else {
+							return <RepositoryItem key={repo.id} item={repo} />;
+						}
+					})}
+					{isFetchingNextPage ? <h3>読み込み中...</h3> : null}
 				</div>
 			}
 			{isError ? (
