@@ -15,8 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: 'Github Repository Search',
-	description: 'A simple Github repository search app',
+	title: 'GitHubリポジトリ検索アプリ',
+	description:
+		'Next.js 15 を使用して、GitHub のリポジトリを検索し、その情報を一覧表示するアプリケーション',
 };
 
 export default function RootLayout({

@@ -9,7 +9,7 @@ export default function Navbar() {
 					<Link href='/'>
 						<div className='flex items-center justify-between h-16  border-b border-gray-200'>
 							<h1 className='text-xl font-bold text-gray-800 py-8 cursor-pointer hover:text-gray-600 transition-colors duration-200'>
-								Github Repository Search
+								GitHubリポジトリ検索アプリ
 							</h1>
 						</div>
 					</Link>
