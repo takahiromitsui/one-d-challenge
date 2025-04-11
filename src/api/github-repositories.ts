@@ -1,3 +1,5 @@
+import { translateErrorMessage } from '@/lib/utils';
+
 const BASE_URL = 'https://api.github.com/search';
 
 export type GithubRepositoryItem = {
@@ -128,7 +130,7 @@ export async function getGithubRepositories(page: number, search: string) {
 
 	// GitHub returns 200 with an error message in the body
 	if (!response.ok || data.message) {
-		throw new Error(data.message || '不明なエラー');
+		throw new Error(translateErrorMessage(data.message || '不明なエラー'));
 	}
 
 	return data;
