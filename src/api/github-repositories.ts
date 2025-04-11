@@ -1,6 +1,7 @@
 import { translateErrorMessage } from '@/lib/utils';
 
 const BASE_URL = 'https://api.github.com/search';
+const DEFAULT_PAGE_SIZE = 30;
 
 export type GithubRepositoryItem = {
 	id: number;
@@ -116,8 +117,6 @@ export type GithubRepository = {
 	incomplete_results: boolean;
 	items: GithubRepositoryItem[];
 };
-
-export const DEFAULT_PAGE_SIZE = 30;
 
 export async function getGithubRepositories(page: number, search: string) {
 	const response = await fetch(
